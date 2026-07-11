@@ -14,10 +14,19 @@ export default {
       feedback: {
         success: 'RSS успешно загружен',
       },
+      sections: {
+        feeds: 'Фиды',
+        posts: 'Посты',
+      },
       errors: {
         required: 'Не должно быть пустым',
         invalidUrl: 'Ссылка должна быть валидным URL',
         duplicate: 'RSS уже существует',
+        parse: 'Ресурс не содержит валидный RSS',
+        network: 'Ошибка сети',
+      },
+      ui: {
+        preview: 'Посмотреть',
       },
     },
   };

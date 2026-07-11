@@ -4,6 +4,8 @@ export const errorKeys = {
   required: 'errors.required',
   invalidUrl: 'errors.invalidUrl',
   duplicate: 'errors.duplicate',
+  parse: 'errors.parse',
+  network: 'errors.network',
 };
 
 yup.setLocale({

@@ -14,10 +14,19 @@ export default {
       feedback: {
         success: 'RSS has been loaded',
       },
+      sections: {
+        feeds: 'Feeds',
+        posts: 'Posts',
+      },
       errors: {
         required: 'Should not be empty',
         invalidUrl: 'Link must be a valid URL',
         duplicate: 'RSS already exists',
+        parse: 'The resource does not contain valid RSS',
+        network: 'Network error',
+      },
+      ui: {
+        preview: 'View',
       },
     },
   };

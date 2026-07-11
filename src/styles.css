@@ -125,6 +125,22 @@ body {
   text-decoration: underline;
 }
 
+.posts .card,
+.feeds .card {
+  height: 100%;
+}
+
+.posts .list-group-item,
+.feeds .list-group-item {
+  border-bottom: 0px solid #e9ecef;
+  border: none;
+}
+
+.posts .list-group-item:last-child,
+.feeds .list-group-item:last-child {
+  border-bottom: none;
+}
+
 @media (max-width: 780px) {
   .rss-submit .btn-text {
     font-size: 0;

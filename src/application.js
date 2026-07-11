@@ -2,8 +2,13 @@ import './styles.css';
 import i18next from 'i18next';
 import { proxy } from 'valtio/vanilla';
 import initView from './view.js';
-import validateRss from './validation.js';
+import validateRss, { errorKeys } from './validation.js';
 import resources from './locales/index.js';
+import fetchRss from './api.js';
+import parseRss from './parser.js';
+
+let nextId = 1;
+const generateId = () => String(nextId++);
 
 const createInitialState = () => ({
   form: {
@@ -12,9 +17,8 @@ const createInitialState = () => ({
     successKey: null,
   },
   feeds: [],
+  posts: [],
 });
-
-const createFeed = (url) => ({ url });
 
 const initI18n = () => {
   const instance = i18next.createInstance();
@@ -41,6 +45,8 @@ const runApp = () => {
     label: document.querySelector('[data-i18n="form.label"]'),
     hint: document.querySelector('[data-i18n="form.example"]'),
     footerPrefix: document.querySelector('[data-i18n="footer.createdBy"]'),
+    feeds: document.querySelector('.feeds'),
+    posts: document.querySelector('.posts'),
   };
 
   initI18n().then((i18n) => {
@@ -58,8 +64,29 @@ const runApp = () => {
       state.form.successKey = null;
 
       validateRss(url, existingUrls)
-        .then(({ url: validUrl }) => {
-          state.feeds.push(createFeed(validUrl));
+        .then(() => fetchRss(url))
+        .then((response) => {
+          const { feed, posts } = parseRss(response.data.contents);
+
+          const feedId = generateId();
+          const preparedFeed = {
+            id: feedId,
+            url,
+            title: feed.title,
+            description: feed.description,
+          };
+
+          const preparedPosts = posts.map((post) => ({
+            id: generateId(),
+            feedId,
+            title: post.title,
+            description: post.description,
+            link: post.link,
+          }));
+
+          state.feeds.unshift(preparedFeed);
+          state.posts.unshift(...preparedPosts);
+
           state.form.processState = 'finished';
           state.form.errorKey = null;
           state.form.successKey = 'feedback.success';
@@ -69,8 +96,19 @@ const runApp = () => {
         })
         .catch((error) => {
           state.form.processState = 'failed';
-          state.form.errorKey = error.errors[0];
           state.form.successKey = null;
+
+          if (error.errors) {
+            state.form.errorKey = error.errors[0];
+            return;
+          }
+
+          if (error.message === errorKeys.parse) {
+            state.form.errorKey = errorKeys.parse;
+            return;
+          }
+
+          state.form.errorKey = errorKeys.network;
         });
     });
   });
