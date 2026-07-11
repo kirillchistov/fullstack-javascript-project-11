@@ -120,7 +120,8 @@ body {
 
 .posts .list-group-item,
 .feeds .list-group-item {
-  border-bottom: 1px solid #e9ecef;
+  border: none;
+  /* border-bottom: 0px solid #e9ecef; */
 }
 
 .posts .list-group-item:last-child,
