@@ -1,6 +1,7 @@
 import './styles.css';
 import i18next from 'i18next';
 import { proxy } from 'valtio/vanilla';
+import { Modal } from 'bootstrap';
 import initView from './view.js';
 import validateRss, { errorKeys } from './validation.js';
 import resources from './locales/index.js';
@@ -18,6 +19,9 @@ const createInitialState = () => ({
   },
   feeds: [],
   posts: [],
+  ui: {
+    openedPostId: null,
+  },
 });
 
 const initI18n = () => {
@@ -47,10 +51,20 @@ const runApp = () => {
     footerPrefix: document.querySelector('[data-i18n="footer.createdBy"]'),
     feeds: document.querySelector('.feeds'),
     posts: document.querySelector('.posts'),
+    modal: document.querySelector('#postModal'),
+    modalTitle: document.querySelector('#postModalLabel'),
+    modalBody: document.querySelector('#postModal .modal-body'),
+    modalOpenLink: document.querySelector('#postModal .modal-open-link'),
   };
 
+  const modalInstance = new Modal(elements.modal);
+
+  elements.modal.addEventListener('hidden.bs.modal', () => {
+    state.ui.openedPostId = null;
+  });
+
   initI18n().then((i18n) => {
-    initView(state, elements, i18n);
+    initView(state, elements, i18n, modalInstance);
 
     elements.form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -83,6 +97,8 @@ const runApp = () => {
             description: post.description,
             link: post.link,
           }));
+          // eslint-disable-next-line no-console
+          console.log(preparedPosts);
 
           state.feeds.unshift(preparedFeed);
           state.posts.unshift(...preparedPosts);

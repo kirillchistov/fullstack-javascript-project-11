@@ -56,6 +56,10 @@ const createCard = (title) => {
 };
 
 const renderFeeds = (watchedState, elements, i18n) => {
+  if (!elements.feeds) {
+    return;
+  }
+
   elements.feeds.innerHTML = '';
 
   if (watchedState.feeds.length === 0) {
@@ -86,55 +90,84 @@ const renderFeeds = (watchedState, elements, i18n) => {
   elements.feeds.appendChild(card);
 };
 
-const renderPosts = (watchedState, elements, i18n) => {
-    elements.posts.innerHTML = '';
-  
-    if (watchedState.posts.length === 0) {
-      return;
-    }
-  
-    const { card, body } = createCard(i18n.t('sections.posts'));
-    const list = document.createElement('ul');
-    list.classList.add('list-group', 'border-0', 'rounded-0');
-  
-    watchedState.posts.forEach((post) => {
-      const item = document.createElement('li');
-      item.classList.add('list-group-item', 'px-0', 'py-3');
-  
-      const row = document.createElement('div');
-      row.classList.add('d-flex', 'justify-content-between', 'align-items-start', 'gap-3');
-  
-      const link = document.createElement('a');
-      link.href = post.link;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      link.classList.add('fw-bold', 'text-decoration-none', 'flex-grow-1');
-      link.textContent = post.title;
-  
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.classList.add('btn', 'btn-outline-primary', 'btn-sm', 'flex-shrink-0');
-      button.textContent = i18n.t('ui.preview');
-  
-      row.append(link, button);
-      item.appendChild(row);
-      list.appendChild(item);
+const renderPosts = (state, watchedState, elements, i18n) => {
+  if (!elements.posts) {
+    return;
+  }
+
+  elements.posts.innerHTML = '';
+
+  if (watchedState.posts.length === 0) {
+    return;
+  }
+
+  const { card, body } = createCard(i18n.t('sections.posts'));
+  const list = document.createElement('ul');
+  list.classList.add('list-group', 'border-0', 'rounded-0');
+
+  watchedState.posts.forEach((post) => {
+    const item = document.createElement('li');
+    item.classList.add('list-group-item', 'px-0', 'py-3');
+
+    const row = document.createElement('div');
+    row.classList.add('d-flex', 'justify-content-between', 'align-items-start', 'gap-3');
+
+    const link = document.createElement('a');
+    link.href = post.link;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.classList.add('fw-bold', 'text-decoration-none', 'flex-grow-1');
+    link.textContent = post.title;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.classList.add('btn', 'btn-outline-primary', 'btn-sm', 'flex-shrink-0');
+    button.textContent = i18n.t('ui.preview');
+    button.addEventListener('click', () => {
+      state.ui.openedPostId = post.id;
     });
-  
-    body.appendChild(list);
-    elements.posts.appendChild(card);
+
+    row.append(link, button);
+    item.appendChild(row);
+    list.appendChild(item);
+  });
+
+  body.appendChild(list);
+  elements.posts.appendChild(card);
 };
 
-const render = (state, elements, i18n) => {
+const renderModalState = (watchedState, elements, i18n, modalInstance) => {
+  const openedPostId = watchedState.ui?.openedPostId;
+
+  if (!openedPostId) {
+    return;
+  }
+
+  const currentPost = watchedState.posts.find((post) => post.id === openedPostId);
+
+  if (!currentPost) {
+    return;
+  }
+
+  elements.modalTitle.textContent = currentPost.title;
+  elements.modalBody.textContent = currentPost.description;
+  elements.modalOpenLink.href = currentPost.link;
+  elements.modalOpenLink.textContent = i18n.t('ui.readFull');
+
+  modalInstance.show();
+};
+
+const render = (state, elements, i18n, modalInstance) => {
   const watchedState = snapshot(state);
 
   renderTexts(elements, i18n);
   renderFormState(watchedState, elements, i18n);
+  renderPosts(state, watchedState, elements, i18n);
   renderFeeds(watchedState, elements, i18n);
-  renderPosts(watchedState, elements, i18n);
+  renderModalState(watchedState, elements, i18n, modalInstance);
 };
 
-export default (state, elements, i18n) => {
-  subscribe(state, () => render(state, elements, i18n));
-  render(state, elements, i18n);
+export default (state, elements, i18n, modalInstance) => {
+  subscribe(state, () => render(state, elements, i18n, modalInstance));
+  render(state, elements, i18n, modalInstance);
 };

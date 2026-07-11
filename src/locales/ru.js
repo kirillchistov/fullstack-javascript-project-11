@@ -27,6 +27,7 @@ export default {
       },
       ui: {
         preview: 'Посмотреть',
+        readFull: 'Читать полностью',
       },
     },
   };
