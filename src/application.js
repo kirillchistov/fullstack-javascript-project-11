@@ -6,23 +6,62 @@ import initView from './view.js';
 import validateRss, { errorKeys } from './validation.js';
 import resources from './locales/index.js';
 import fetchRss from './api.js';
-import parseRss from './parser.js';
+import parseRss, { parseErrorMessage } from './parser.js';
+
+const storageKey = 'rss-reader-state';
 
 let nextId = 1;
 const generateId = () => String(nextId++);
 
-const createInitialState = () => ({
-  form: {
-    processState: 'filling',
-    errorKey: null,
-    successKey: null,
-  },
-  feeds: [],
-  posts: [],
-  ui: {
-    openedPostId: null,
-  },
-});
+const loadState = () => {
+  const raw = localStorage.getItem(storageKey);
+
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
+const persistState = (state) => {
+  const data = {
+    feeds: state.feeds,
+    readPostLinks: state.ui.readPostLinks,
+  };
+
+  localStorage.setItem(storageKey, JSON.stringify(data));
+};
+
+const createInitialState = () => {
+  const savedState = loadState();
+
+  return {
+    form: {
+      processState: 'filling',
+      errorKey: null,
+      successKey: null,
+    },
+    feeds: savedState?.feeds ?? [],
+    posts: [],
+    ui: {
+      openedPostId: null,
+      isWatcherStarted: false,
+      readPostLinks: savedState?.readPostLinks ?? [],
+    },
+  };
+};
+
+const buildPosts = (posts, feedId) => posts.map((post) => ({
+  id: generateId(),
+  feedId,
+  title: post.title,
+  description: post.description,
+  link: post.link,
+}));
 
 const initI18n = () => {
   const instance = i18next.createInstance();
@@ -55,6 +94,11 @@ const runApp = () => {
     modalTitle: document.querySelector('#postModalLabel'),
     modalBody: document.querySelector('#postModal .modal-body'),
     modalOpenLink: document.querySelector('#postModal .modal-open-link'),
+    modalCloseButton: document.querySelector('#postModal .modal-close-button'),
+  };
+
+  elements.onReadPost = () => {
+    persistState(state);
   };
 
   const modalInstance = new Modal(elements.modal);
@@ -63,8 +107,64 @@ const runApp = () => {
     state.ui.openedPostId = null;
   });
 
+  const watchFeeds = () => {
+    const currentFeeds = [...state.feeds];
+
+    if (currentFeeds.length === 0) {
+      setTimeout(watchFeeds, 5000);
+      return;
+    }
+
+    const promises = currentFeeds.map((feed) => fetchRss(feed.url)
+      .then((response) => {
+        const { posts } = parseRss(response.data.contents);
+
+        const existingLinks = state.posts
+          .filter((post) => post.feedId === feed.id)
+          .map((post) => post.link);
+
+        const freshPosts = posts.filter((post) => !existingLinks.includes(post.link));
+
+        if (freshPosts.length === 0) {
+          return;
+        }
+
+        const preparedPosts = buildPosts(freshPosts, feed.id);
+        state.posts.unshift(...preparedPosts);
+      })
+      .catch(() => {
+      }));
+
+    Promise.all(promises)
+      .finally(() => {
+        setTimeout(watchFeeds, 5000);
+      });
+  };
+
+  const loadSavedFeedsPosts = () => {
+    const feedRequests = state.feeds.map((feed) => fetchRss(feed.url)
+      .then((response) => {
+        const { posts } = parseRss(response.data.contents);
+        return buildPosts(posts, feed.id);
+      })
+      .catch(() => []));
+
+    Promise.all(feedRequests)
+      .then((postsGroups) => {
+        const allPosts = postsGroups.flat();
+        state.posts = allPosts;
+      });
+  };
+
   initI18n().then((i18n) => {
     initView(state, elements, i18n, modalInstance);
+
+    loadSavedFeedsPosts();
+
+    if (!state.ui.isWatcherStarted) {
+      state.ui.isWatcherStarted = true;
+      watchFeeds();
+    }
 
     elements.form.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -90,18 +190,12 @@ const runApp = () => {
             description: feed.description,
           };
 
-          const preparedPosts = posts.map((post) => ({
-            id: generateId(),
-            feedId,
-            title: post.title,
-            description: post.description,
-            link: post.link,
-          }));
-          // eslint-disable-next-line no-console
-          console.log(preparedPosts);
+          const preparedPosts = buildPosts(posts, feedId);
 
           state.feeds.unshift(preparedFeed);
           state.posts.unshift(...preparedPosts);
+
+          persistState(state);
 
           state.form.processState = 'finished';
           state.form.errorKey = null;
@@ -119,7 +213,7 @@ const runApp = () => {
             return;
           }
 
-          if (error.message === errorKeys.parse) {
+          if (error.message === parseErrorMessage) {
             state.form.errorKey = errorKeys.parse;
             return;
           }
@@ -127,6 +221,14 @@ const runApp = () => {
           state.form.errorKey = errorKeys.network;
         });
     });
+
+    // state.ui.readPostLinks.push = new Proxy(state.ui.readPostLinks.push, {
+    //   apply(target, thisArg, args) {
+    //     const result = Reflect.apply(target, thisArg, args);
+    //     persistState(state);
+    //     return result;
+    //   },
+    // });
   });
 };
 

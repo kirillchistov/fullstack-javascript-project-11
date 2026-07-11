@@ -9,6 +9,8 @@ const renderTexts = (elements, i18n) => {
   elements.hint.textContent = i18n.t('form.example');
   elements.submitText.textContent = i18n.t('form.submit');
   elements.footerPrefix.textContent = i18n.t('footer.createdBy');
+  elements.modalOpenLink.textContent = i18n.t('ui.readFull');
+  elements.modalCloseButton.textContent = i18n.t('ui.close');
 };
 
 const renderFormState = (watchedState, elements, i18n) => {
@@ -74,15 +76,27 @@ const renderFeeds = (watchedState, elements, i18n) => {
     const item = document.createElement('li');
     item.classList.add('list-group-item', 'border-0', 'px-0');
 
+    const titleRow = document.createElement('div');
+    titleRow.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mb-1', 'gap-3');
+
     const title = document.createElement('h3');
-    title.classList.add('h6', 'm-0', 'mb-1');
+    title.classList.add('h6', 'm-0');
     title.textContent = feed.title;
+
+    const link = document.createElement('a');
+    link.href = feed.url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.classList.add('small', 'text-decoration-none', 'flex-shrink-0');
+    link.textContent = i18n.t('ui.source');
+
+    titleRow.append(title, link);
 
     const description = document.createElement('p');
     description.classList.add('m-0', 'text-muted', 'small');
     description.textContent = feed.description;
 
-    item.append(title, description);
+    item.append(titleRow, description);
     list.appendChild(item);
   });
 
@@ -106,6 +120,8 @@ const renderPosts = (state, watchedState, elements, i18n) => {
   list.classList.add('list-group', 'border-0', 'rounded-0');
 
   watchedState.posts.forEach((post) => {
+    const isRead = watchedState.ui.readPostLinks.includes(post.link);
+
     const item = document.createElement('li');
     item.classList.add('list-group-item', 'px-0', 'py-3');
 
@@ -116,7 +132,8 @@ const renderPosts = (state, watchedState, elements, i18n) => {
     link.href = post.link;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
-    link.classList.add('fw-bold', 'text-decoration-none', 'flex-grow-1');
+    link.classList.add('text-decoration-none', 'flex-grow-1');
+    link.classList.add(isRead ? 'fw-normal' : 'fw-bold');
     link.textContent = post.title;
 
     const button = document.createElement('button');
@@ -125,6 +142,14 @@ const renderPosts = (state, watchedState, elements, i18n) => {
     button.textContent = i18n.t('ui.preview');
     button.addEventListener('click', () => {
       state.ui.openedPostId = post.id;
+    
+      if (!state.ui.readPostLinks.includes(post.link)) {
+        state.ui.readPostLinks.push(post.link);
+      }
+    
+      if (typeof elements.onReadPost === 'function') {
+        elements.onReadPost();
+      }
     });
 
     row.append(link, button);

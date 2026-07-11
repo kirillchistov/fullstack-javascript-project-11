@@ -113,6 +113,21 @@ body {
   background: var(--page-bg);
 }
 
+.posts .card,
+.feeds .card {
+  height: 100%;
+}
+
+.posts .list-group-item,
+.feeds .list-group-item {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.posts .list-group-item:last-child,
+.feeds .list-group-item:last-child {
+  border-bottom: none;
+}
+
 .footer {
   background: var(--footer-bg);
   border-top: 1px solid var(--footer-border);
@@ -123,22 +138,6 @@ body {
 .footer a {
   color: #0d6efd;
   text-decoration: underline;
-}
-
-.posts .card,
-.feeds .card {
-  height: 100%;
-}
-
-.posts .list-group-item,
-.feeds .list-group-item {
-  border-bottom: 0px solid #e9ecef;
-  border: none;
-}
-
-.posts .list-group-item:last-child,
-.feeds .list-group-item:last-child {
-  border-bottom: none;
 }
 
 @media (max-width: 780px) {
