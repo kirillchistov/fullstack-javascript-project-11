@@ -58,10 +58,6 @@ const createCard = (title) => {
 };
 
 const renderFeeds = (watchedState, elements, i18n) => {
-  if (!elements.feeds) {
-    return;
-  }
-
   elements.feeds.innerHTML = '';
 
   if (watchedState.feeds.length === 0) {
@@ -105,10 +101,6 @@ const renderFeeds = (watchedState, elements, i18n) => {
 };
 
 const renderPosts = (state, watchedState, elements, i18n) => {
-  if (!elements.posts) {
-    return;
-  }
-
   elements.posts.innerHTML = '';
 
   if (watchedState.posts.length === 0) {
@@ -142,11 +134,11 @@ const renderPosts = (state, watchedState, elements, i18n) => {
     button.textContent = i18n.t('ui.preview');
     button.addEventListener('click', () => {
       state.ui.openedPostId = post.id;
-    
+
       if (!state.ui.readPostLinks.includes(post.link)) {
         state.ui.readPostLinks.push(post.link);
       }
-    
+
       if (typeof elements.onReadPost === 'function') {
         elements.onReadPost();
       }
@@ -162,7 +154,7 @@ const renderPosts = (state, watchedState, elements, i18n) => {
 };
 
 const renderModalState = (watchedState, elements, i18n, modalInstance) => {
-  const openedPostId = watchedState.ui?.openedPostId;
+  const openedPostId = watchedState.ui.openedPostId;
 
   if (!openedPostId) {
     return;

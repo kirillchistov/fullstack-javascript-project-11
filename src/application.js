@@ -10,9 +10,6 @@ import parseRss, { parseErrorMessage } from './parser.js';
 
 const storageKey = 'rss-reader-state';
 
-let nextId = 1;
-const generateId = () => String(nextId++);
-
 const loadState = () => {
   const raw = localStorage.getItem(storageKey);
 
@@ -25,15 +22,6 @@ const loadState = () => {
   } catch {
     return null;
   }
-};
-
-const persistState = (state) => {
-  const data = {
-    feeds: state.feeds,
-    readPostLinks: state.ui.readPostLinks,
-  };
-
-  localStorage.setItem(storageKey, JSON.stringify(data));
 };
 
 const createInitialState = () => {
@@ -55,14 +43,6 @@ const createInitialState = () => {
   };
 };
 
-const buildPosts = (posts, feedId) => posts.map((post) => ({
-  id: generateId(),
-  feedId,
-  title: post.title,
-  description: post.description,
-  link: post.link,
-}));
-
 const initI18n = () => {
   const instance = i18next.createInstance();
 
@@ -75,7 +55,27 @@ const initI18n = () => {
 };
 
 const runApp = () => {
+  let nextId = 1;
+  const generateId = () => String(nextId++);
+
+  const buildPosts = (posts, feedId) => posts.map((post) => ({
+    id: generateId(),
+    feedId,
+    title: post.title,
+    description: post.description,
+    link: post.link,
+  }));
+
   const state = proxy(createInitialState());
+
+  const persistState = () => {
+    const data = {
+      feeds: state.feeds,
+      readPostLinks: state.ui.readPostLinks,
+    };
+
+    localStorage.setItem(storageKey, JSON.stringify(data));
+  };
 
   const elements = {
     form: document.querySelector('.rss-form'),
@@ -95,10 +95,9 @@ const runApp = () => {
     modalBody: document.querySelector('#postModal .modal-body'),
     modalOpenLink: document.querySelector('#postModal .modal-open-link'),
     modalCloseButton: document.querySelector('#postModal .modal-close-button'),
-  };
-
-  elements.onReadPost = () => {
-    persistState(state);
+    onReadPost: () => {
+      persistState();
+    },
   };
 
   const modalInstance = new Modal(elements.modal);
@@ -151,8 +150,7 @@ const runApp = () => {
 
     Promise.all(feedRequests)
       .then((postsGroups) => {
-        const allPosts = postsGroups.flat();
-        state.posts = allPosts;
+        state.posts = postsGroups.flat();
       });
   };
 
@@ -195,7 +193,7 @@ const runApp = () => {
           state.feeds.unshift(preparedFeed);
           state.posts.unshift(...preparedPosts);
 
-          persistState(state);
+          persistState();
 
           state.form.processState = 'finished';
           state.form.errorKey = null;
@@ -221,14 +219,6 @@ const runApp = () => {
           state.form.errorKey = errorKeys.network;
         });
     });
-
-    // state.ui.readPostLinks.push = new Proxy(state.ui.readPostLinks.push, {
-    //   apply(target, thisArg, args) {
-    //     const result = Reflect.apply(target, thisArg, args);
-    //     persistState(state);
-    //     return result;
-    //   },
-    // });
   });
 };
 
