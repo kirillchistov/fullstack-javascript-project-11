@@ -9,6 +9,10 @@
   --footer-border: #d7dce1;
 }
 
+html {
+  font-size: 16px;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -54,8 +58,13 @@ body {
   font-weight: 500;
 }
 
+.rss-controls {
+  align-items: stretch;
+}
+
 .rss-input {
   min-height: 52px;
+  height: 52px;
   border: 1px solid transparent;
   border-radius: 0.35rem;
   background: #f8f9fa;
@@ -76,10 +85,16 @@ body {
 
 .rss-submit {
   min-height: 52px;
+  height: 52px;
+  width: 100%;
   font-size: 1.25rem;
   font-weight: 400;
   color: #212529;
   border-radius: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 
 .rss-hint {
@@ -110,16 +125,44 @@ body {
   text-decoration: underline;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 780px) {
+  .rss-submit .btn-text {
+    font-size: 0;
+  }
+
+  .rss-submit .btn-text::after {
+    content: '+';
+    font-size: 1.5rem;
+    line-height: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  html {
+    font-size: 14px;
+  }
+
   .hero-title {
-    font-size: 2.5rem;
+    font-size: 2.4rem;
   }
 
   .hero-text {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
+  .rss-input,
   .rss-submit {
-    font-size: 1.1rem;
+    min-height: 46px;
+    height: 46px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-text {
+    font-size: 0.95rem;
   }
 }

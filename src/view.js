@@ -1,6 +1,17 @@
 import { subscribe, snapshot } from 'valtio/vanilla';
 
-const render = (state, elements) => {
+const renderTexts = (elements, i18n) => {
+  elements.title.textContent = i18n.t('title');
+  elements.description.textContent = i18n.t('description');
+  elements.label.textContent = i18n.t('form.label');
+  elements.input.placeholder = i18n.t('form.placeholder');
+  elements.input.setAttribute('aria-label', i18n.t('form.label'));
+  elements.hint.textContent = i18n.t('form.example');
+  elements.submitText.textContent = i18n.t('form.submit');
+  elements.footerPrefix.textContent = i18n.t('footer.createdBy');
+};
+
+const renderFormState = (state, elements, i18n) => {
   const { form } = snapshot(state);
 
   elements.input.classList.remove('is-invalid');
@@ -15,19 +26,24 @@ const render = (state, elements) => {
     elements.input.removeAttribute('readonly');
   }
 
-  if (form.error) {
+  if (form.errorKey) {
     elements.input.classList.add('is-invalid');
     elements.feedback.classList.add('invalid-feedback', 'd-block');
-    elements.feedback.textContent = form.error;
+    elements.feedback.textContent = i18n.t(form.errorKey);
   }
 
-  if (form.successMessage) {
+  if (form.successKey) {
     elements.feedback.classList.add('text-success');
-    elements.feedback.textContent = form.successMessage;
+    elements.feedback.textContent = i18n.t(form.successKey);
   }
 };
 
-export default (state, elements) => {
-  subscribe(state, () => render(state, elements));
-  render(state, elements);
+const render = (state, elements, i18n) => {
+  renderTexts(elements, i18n);
+  renderFormState(state, elements, i18n);
+};
+
+export default (state, elements, i18n) => {
+  subscribe(state, () => render(state, elements, i18n));
+  render(state, elements, i18n);
 };
