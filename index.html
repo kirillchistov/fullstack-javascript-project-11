@@ -3,44 +3,54 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RSS Reader</title>
+    <title>RSS агрегатор</title>
   </head>
-  <body class="bg-light">
-    <div class="container py-5">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <div class="card shadow-sm">
-            <div class="card-body p-5">
-              <h1 class="display-6 mb-4">RSS агрегатор</h1>
-              <p class="text-muted mb-4">
+  <body>
+    <div class="page-wrapper">
+      <header class="hero py-5">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+              <h1 class="hero-title mb-3">RSS агрегатор</h1>
+              <p class="hero-text mb-4">
                 Начните читать RSS сегодня! Это легко, это красиво.
               </p>
 
-              <form class="row g-2">
-                <div class="col-md-9">
-                  <label for="url" class="visually-hidden">RSS URL</label>
-                  <input
-                    id="url"
-                    name="url"
-                    type="text"
-                    class="form-control form-control-lg"
-                    placeholder="Ссылка на RSS"
-                  />
-                </div>
-                <div class="col-md-3 d-grid">
-                  <button type="submit" class="btn btn-primary btn-lg">
-                    Добавить
-                  </button>
+              <form class="rss-form">
+                <div class="row g-3 align-items-start">
+                  <div class="col-md-9">
+                    <label for="url" class="visually-hidden">RSS URL</label>
+                    <input
+                      id="url"
+                      name="url"
+                      type="text"
+                      class="form-control form-control-lg rss-input"
+                      placeholder="Ссылка RSS"
+                    />
+                    <div class="form-text rss-hint">
+                      Пример: https://lorem-rss.hexlet.app/feed
+                    </div>
+                  </div>
+                  <div class="col-md-3 d-grid">
+                    <button type="submit" class="btn btn-light btn-lg rss-submit">
+                      Добавить
+                    </button>
+                  </div>
                 </div>
               </form>
-
-              <p class="text-muted small mt-2 mb-0">
-                Пример: https://lorem-rss.hexlet.app/feed
-              </p>
             </div>
           </div>
         </div>
-      </div>
+      </header>
+
+      <main class="content-area"></main>
+
+      <footer class="footer py-3">
+        <div class="container text-center">
+          created by
+          <a href="https://ru.hexlet.io/" target="_blank" rel="noopener noreferrer">Hexlet</a>
+        </div>
+      </footer>
     </div>
 
     <script type="module" src="/src/main.js"></script>
