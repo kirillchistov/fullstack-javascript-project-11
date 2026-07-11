@@ -10,27 +10,32 @@
       <header class="hero py-5">
         <div class="container">
           <div class="row justify-content-center">
-            <div class="col-lg-8 col-xl-7">
+            <div class="col-12 col-lg-8 col-xl-7">
               <h1 class="hero-title mb-3">RSS агрегатор</h1>
               <p class="hero-text mb-4">
                 Начните читать RSS сегодня! Это легко, это красиво.
               </p>
 
-              <form class="rss-form">
+              <form class="rss-form" novalidate>
                 <div class="row g-3 align-items-start">
                   <div class="col-md-9">
-                    <label for="url" class="visually-hidden">RSS URL</label>
+                    <label for="url" class="form-label hero-label">Ссылка RSS</label>
                     <input
                       id="url"
                       name="url"
                       type="text"
                       class="form-control form-control-lg rss-input"
                       placeholder="Ссылка RSS"
+                      aria-label="Ссылка RSS"
+                      required
+                      autofocus
                     />
+                    <div class="feedback mt-2"></div>
                     <div class="form-text rss-hint">
                       Пример: https://lorem-rss.hexlet.app/feed
                     </div>
                   </div>
+
                   <div class="col-md-3 d-grid">
                     <button type="submit" class="btn btn-light btn-lg rss-submit">
                       Добавить
@@ -53,6 +58,6 @@
       </footer>
     </div>
 
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/application.js"></script>
   </body>
 </html>
